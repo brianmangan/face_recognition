@@ -88,25 +88,25 @@ def get_image_bound(file_stream, filename):
     max_size = 800, 800
 
     pillage = Image.open(file_stream)
-    try:
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation] == 'Orientation':
-                break
-
-        exif = pillage._getexif()
-
-        if exif[orientation] == 3:
-            image = pillage.rotate(180, expand=True)
-        elif exif[orientation] == 6:
-            image = pillage.rotate(270, expand=True)
-        elif exif[orientation] == 8:
-            image = pillage.rotate(90, expand=True)
-
-        # pillage.save(filepath)
-        # pillage.close()
-    except (AttributeError, KeyError, IndexError):
-        # cases: image don't have getexif
-        pass
+    # try:
+    #     for orientation in ExifTags.TAGS.keys():
+    #         if ExifTags.TAGS[orientation] == 'Orientation':
+    #             break
+    #
+    #     exif = pillage._getexif()
+    #
+    #     if exif[orientation] == 3:
+    #         image = pillage.rotate(180, expand=True)
+    #     elif exif[orientation] == 6:
+    #         image = pillage.rotate(270, expand=True)
+    #     elif exif[orientation] == 8:
+    #         image = pillage.rotate(90, expand=True)
+    #
+    #     # pillage.save(filepath)
+    #     # pillage.close()
+    # except (AttributeError, KeyError, IndexError):
+    #     # cases: image don't have getexif
+    #     pass
 
 
 
