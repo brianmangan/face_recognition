@@ -90,24 +90,24 @@ def detect_faces_in_image(file_stream):
     # Load the uploaded image file
     img = face_recognition.load_image_file(file_stream)
     # Get face encodings for any faces in the uploaded image
-    unknown_face_encodings = face_recognition.face_encodings(img)
+    unknown_face_locations = face_recognition.face_locations(img)
 
     face_found = False
     is_obama = False
-
-    if len(unknown_face_encodings) > 0:
-        face_found = True
-        # See if the first face in the uploaded image matches the known face of Obama
-        match_results = face_recognition.compare_faces([known_face_encoding], unknown_face_encodings[0])
-        if match_results[0]:
-            is_obama = True
+    #
+    # if len(unknown_face_encodings) > 0:
+    #     face_found = True
+    #     # See if the first face in the uploaded image matches the known face of Obama
+    #     match_results = face_recognition.compare_faces([known_face_encoding], unknown_face_encodings[0])
+    #     if match_results[0]:
+    #         is_obama = True
 
     # Return the result as json
-    result = {
-        "face_found_in_image": face_found,
-        "is_picture_of_obama": is_obama
-    }
-    return jsonify(result)
+    # result = {
+    #     "face_found_in_image": face_found,
+    #     "is_picture_of_obama": is_obama
+    # }
+    return jsonify(unknown_face_locations)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
