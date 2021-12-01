@@ -15,12 +15,9 @@
 
 # NOTE: This example requires flask to be installed! You can install it with pip:
 # $ pip3 install flask
-from io import StringIO, BytesIO
 
 import face_recognition
-from flask import Flask, jsonify, request, redirect, send_file
-from PIL import Image, ImageDraw
-
+from flask import Flask, jsonify, request, redirect
 
 # You can change this to any folder on your system
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -35,7 +32,6 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_image():
-    form_vars = request.form
     # Check if a valid image file was uploaded
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -48,13 +44,7 @@ def upload_image():
 
         if file and allowed_file(file.filename):
             # The image file seems valid! Detect faces and return the result.
-            for fv in form_vars:
-                val = form_vars[fv]
-                if fv == 'runFunction' and form_vars[fv] == 'detect_faces_in_image':
-                    return detect_faces_in_image(file)
-
-                if fv == 'runFunction' and form_vars[fv] == 'get_image_bound':
-                    return get_image_bound(file, file.filename)
+            return detect_faces_in_image(file)
 
     # If no valid image file was uploaded, show the file upload form:
     return '''
@@ -62,8 +52,6 @@ def upload_image():
     <title>Is this a picture of Obama?</title>
     <h1>Upload a picture and see if it's a picture of Obama!</h1>
     <form method="POST" enctype="multipart/form-data">
-      <input type="hidden" name="runFunction2" value="detect_faces_in_image"/>
-      <input type="hidden" name="runFunction" value="get_image_bound"/>
       <input type="file" name="file">
       <input type="submit" value="Upload">
     </form>
@@ -71,45 +59,28 @@ def upload_image():
 
 
 def detect_faces_in_image(file_stream):
-
+    # Pre-calculated face encoding of Obama generated with face_recognition.face_encodings(img)
     # Load the uploaded image file
     img = face_recognition.load_image_file(file_stream)
     # Get face encodings for any faces in the uploaded image
     unknown_face_locations = face_recognition.face_locations(img, model="hog")
 
+    face_found = False
+    is_obama = False
+    #
+    # if len(unknown_face_encodings) > 0:
+    #     face_found = True
+    #     # See if the first face in the uploaded image matches the known face of Obama
+    #     match_results = face_recognition.compare_faces([known_face_encoding], unknown_face_encodings[0])
+    #     if match_results[0]:
+    #         is_obama = True
+
+    # Return the result as json
+    # result = {
+    #     "face_found_in_image": face_found,
+    #     "is_picture_of_obama": is_obama
+    # }
     return jsonify(unknown_face_locations)
-
-
-def get_image_bound(file_stream, filename):
-
-    unknown_image = face_recognition.load_image_file(file_stream)
-
-    # Find all the faces  in the unknown image
-    face_locations = face_recognition.face_locations(unknown_image)
-
-    # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
-    # See http://pillow.readthedocs.io/ for more about PIL/Pillow
-    pil_image = Image.fromarray(unknown_image)
-    # Create a Pillow ImageDraw Draw instance to draw with
-    draw = ImageDraw.Draw(pil_image)
-
-    # Loop through each face found in the unknown image
-    for (top, right, bottom, left) in face_locations:
-        name = "Unknown"
-        # Draw a box around the face using the Pillow module
-        draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-
-        # Draw a label with a name below the face
-        text_width, text_height = draw.textsize(name)
-        draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
-        draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
-
-    # Remove the drawing library from memory as per the Pillow docs
-    del draw
-
-    pil_image.save('./' + filename)
-    return send_file('./' + filename, mimetype="image/jpeg")
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
