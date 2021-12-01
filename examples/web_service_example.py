@@ -20,7 +20,7 @@ from io import StringIO, BytesIO
 import face_recognition
 from flask import Flask, jsonify, request, redirect, send_file
 from PIL import Image, ImageDraw
-
+import numpy as np
 
 # You can change this to any folder on your system
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -81,10 +81,14 @@ def detect_faces_in_image(file_stream):
 
 
 def get_image_bound(file_stream, filename):
+    max_size = 800, 800
 
-    unknown_image = face_recognition.load_image_file(file_stream)
+    pillage = Image.open(file_stream)
+    pillage.thumbnail(max_size)
+    print(pillage.size)
 
     # Find all the faces  in the unknown image
+    unknown_image = np.array(pillage)
     face_locations = face_recognition.face_locations(unknown_image)
 
     # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
